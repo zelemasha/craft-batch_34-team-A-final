@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+    <munit:config name="craft-34-noteapi-apikit-test.xml" />
+    <http:request-config name="HTTP_Request_Configuration" basePath="/api">
+        <http:request-connection host="localhost" port="8081" />
+    </http:request-config>
+	<global-property doc:name="Global Property" doc:id="538ca4a6-995b-4cc5-8418-d9744b430f7e" name="env" value="dev" />
+	<munit:test name="post:\notes:application\json:notes-config-201-application\json-FlowTest" description="Verifying functionality of [post:\notes:application\json:notes-config-201-application\json]" expectedErrorType="HTTP:INTERNAL_SERVER_ERROR">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="post:\notes:application\json:notes-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<ee:transform doc:name="Transform Message" doc:id="ba2f5922-eaa3-4bee-8b81-8c0cc1496453" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"title":"title1","content":"content1"}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+        </munit:behavior>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="POST" path="/notes">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"4eB85262E9054fa795D139008EfA7Cba","client_id":"3b61ec1702f544769d4b60fa5f7885a2","Content-Type":"application/json"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(201)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 201" />
+            <munit-tools:assert-that expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/post_201_notes_application_json.json','application/json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="post:\notes:application\json:notes-config-400-application\json-FlowTest" description="Verifying functionality of [post:\notes:application\json:notes-config-400-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="post:\notes:application\json:notes-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<ee:transform doc:name="Transform Message" doc:id="f311a696-60fe-41f1-89c5-e03360368394" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"title":"title1","content":"content1"}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+        </munit:behavior>
+		<munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="POST" path="/notes">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client-secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds","Content-Type":"application/json"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="400" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="254479d0-d0eb-4481-94dc-ff46eb6ad89d" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/post_400_notes_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="post:\notes:application\json:notes-config-404-application\json-FlowTest" description="Verifying functionality of [post:\notes:application\json:notes-config-404-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="post:\notes:application\json:notes-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<ee:transform doc:name="Transform Message" doc:id="325fc7b0-1400-4800-a389-a6f6e7a21c61" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"title":"title1","content":"content1"}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+        </munit:behavior>
+		<munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="POST" path="/note">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client-secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds","Content-Type":"application/json"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="404" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="2cd5b3d3-0219-4caa-aced-25375de42e80" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/post_404_notes_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="get:\notes\(noteId):notes-config-200-application\json-FlowTest" description="Verifying functionality of [get:\notes\(noteId):notes-config-200-application\json]" expectedErrorType="APIKIT:ANY">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="get:\notes\(noteId):notes-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="GET" path="/notes/1">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"4eB85262E9054fa795D139008EfA7Cba","client_id":"3b61ec1702f544769d4b60fa5f7885a2"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="79443980-4b9c-438f-9b80-2dcd7e47185b" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_notes_{noteid}_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="get:\notes\(noteId):notes-config-400-application\json-FlowTest" description="Verifying functionality of [get:\notes\(noteId):notes-config-400-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="get:\notes\(noteId):notes-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="GET" path="/notes/1">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="400" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="85cedab3-aada-4b40-83ff-10093fc3b174" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_400_notes_{noteid}_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="get:\notes\(noteId):notes-config-404-application\json-FlowTest" description="Verifying functionality of [get:\notes\(noteId):notes-config-404-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="get:\notes\(noteId):notes-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="GET" path="/note/1">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client-secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="404" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="b94a55e7-3710-48ed-a927-494c7e13e547" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_404_notes_{noteid}_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="get:\notes:notes-config-200-application\json-FlowTest" description="Verifying functionality of [get:\notes:notes-config-200-application\json]" expectedErrorType="ANY">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="get:\notes:notes-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="GET" path="/notes">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"4eB85262E9054fa795D139008EfA7Cba","client_id":"3b61ec1702f544769d4b60fa5f7885a2"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="cd99c686-14e9-4887-b5aa-f35bbd899d9d" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_notes_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="get:\notes:notes-config-404-application\json-FlowTest" description="Verifying functionality of [get:\notes:notes-config-404-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="get:\notes:notes-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="GET" path="/note">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client-secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="404" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="e06874b5-ffb8-48ae-9352-5b5cf39c9654" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_404_notes_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="delete:\notes\(noteId):notes-config-200-application\json-FlowTest" description="Verifying functionality of [delete:\notes\(noteId):notes-config-200-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="delete:\notes\(noteId):notes-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="DELETE" path="/notes/1">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"4eB85262E9054fa795D139008EfA7Cba","client_id":"3b61ec1702f544769d4b60fa5f7885a2"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="377fa5aa-6915-42ea-990a-7f84ab926003" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/delete_200_notes_{noteid}_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="delete:\notes\(noteId):notes-config-400-application\json-FlowTest" description="Verifying functionality of [delete:\notes\(noteId):notes-config-400-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="delete:\notes\(noteId):notes-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="DELETE" path="/notes/1">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="400" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="bd151d85-3bc1-4395-9f48-1b9e9e057677" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/delete_400_notes_{noteid}_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="delete:\notes\(noteId):notes-config-404-application\json-FlowTest" description="Verifying functionality of [delete:\notes\(noteId):notes-config-404-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="delete:\notes\(noteId):notes-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="DELETE" path="/note/1">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client-secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="404" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="d46c737d-b77b-46f3-aceb-e6e905887a78" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/delete_404_notes_{noteid}_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="put:\notes\(noteId):application\json:notes-config-400-application\json-FlowTest" description="Verifying functionality of [put:\notes\(noteId):application\json:notes-config-400-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="put:\notes\(noteId):application\json:notes-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<ee:transform doc:name="Transform Message" doc:id="b2c8c90b-b908-4dd0-b122-543c2bd6515a" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"title":"title1","content":"content1"}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+        </munit:behavior>
+		<munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="PUT" path="/notes/2">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds","Content-Type":"application/json"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="400" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="e40d357f-1a2a-4647-9ab8-482243973dbf" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/put_400_notes_{noteid}_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="put:\notes\(noteId):application\json:notes-config-404-application\json-FlowTest" description="Verifying functionality of [put:\notes\(noteId):application\json:notes-config-404-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="put:\notes\(noteId):application\json:notes-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<ee:transform doc:name="Transform Message" doc:id="37b5bed6-9b97-4a50-aa25-c8797357965e" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"title":"title1","content":"content1"}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+        </munit:behavior>
+		<munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="PUT" path="/note/3">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client-secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds","Content-Type":"application/json"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="404" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
+        </munit:validation>
+    </munit:test>
+	<munit:test name="get:\notes:notes-config-400-application\json-FlowTest" description="Verifying functionality of [get:\notes:notes-config-400-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="get:\notes:notes-config" />
+        </munit:enable-flow-sources>
+        
+		<munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="GET" path="/notes">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"243254354safdsfdsfds","client-id":"243254354safdsfdsfds"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="400" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="b20654f0-0437-488f-993d-5c4150951ebc" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_400_notes_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+	<munit:test name="put:\notes\(noteId):application\json:notes-config-200-application\json-FlowTest" description="Verifying functionality of [put:\notes\(noteId):application\json:notes-config-200-application\json]" expectedErrorType="HTTP:INTERNAL_SERVER_ERROR">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="notes-main" />
+            <munit:enable-flow-source value="put:\notes\(noteId):application\json:notes-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<ee:transform doc:name="Transform Message" doc:id="3eed98cf-937f-4d20-b0d9-da26052e86fb">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{"title":"title1","content":"content1"}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+        </munit:behavior>
+		<munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="PUT" path="/notes/101">
+                <http:headers><![CDATA[#[{"Accept":"application/json","client_secret":"4eB85262E9054fa795D139008EfA7Cba","client_id":"3b61ec1702f544769d4b60fa5f7885a2","Content-Type":"application/json"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="184d43b5-c33a-471e-b44e-87ef2ebbdac9" message="The response payload is not correct!" expression="#[output application/json --- payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/put_200_notes_{noteid}_application_json.json','application/json'))]" />
+        </munit:validation>
+    </munit:test>
+</mule>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <flow name="notes-main">
+        <http:listener config-ref="notes_tutor1-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <ee:transform doc:name="Transform Message" doc:id="20237a58-91b5-475f-8300-1c8a1cd25c77">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="data"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<apikit:router config-ref="notes-config" />
+        <error-handler ref="global-error-handlingError_Handler" />
+    </flow>
+    <flow name="notes-console">
+        <http:listener config-ref="notes_tutor1-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="notes-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{message: "Resource not found"}&#93;&#93;></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform> [STUDIO] -->
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\notes\(noteId):application\json:notes-config">
+		<flow-ref doc:name="getNotById" doc:id="d4b1bea9-bcf0-4c0f-97a7-4bb035221274" name="getNotesById" target="note"/>
+		<choice doc:name="Choice" doc:id="8940ff73-6060-4f53-aa92-a1958cd1e16b" >
+			<when expression="#[sizeOf(vars.note) &gt; 0]">
+				<flow-ref doc:name="UpdateNOtesById" doc:id="75be980a-bb14-4860-b622-f5150fc7b844" name="UpdateNOtesById"/>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="insertingNotes" doc:id="96bd4d60-efe8-4bd2-acc1-075963687d1f" name="insertingNotes"/>
+			</otherwise>
+		</choice>
+    </flow>
+    <flow name="delete:\notes\(noteId):notes-config">
+        <flow-ref doc:name="Flow Reference" doc:id="9e56075b-9740-457d-86f4-65e917acb89a" name="deleteingNotesbyId" />
+    </flow>
+    <flow name="get:\notes:notes-config">
+        <flow-ref doc:name="Flow Reference" doc:id="e8ca9c52-460e-4c07-9d58-897cd1f65832" name="getAllNOtes" />
+    </flow>
+    <flow name="get:\notes\(noteId):notes-config">
+        <flow-ref doc:name="Flow Reference" doc:id="9d41ebde-8361-4820-afbb-7f62be398c99" name="getNotesById" />
+    </flow>
+    <flow name="post:\notes:application\json:notes-config">
+        <flow-ref doc:name="Flow Reference" doc:id="d9fd30a4-b2ec-4fe4-9b38-b56e9bd47e42" name="insertingNotes" />
+    </flow>
+</mule>

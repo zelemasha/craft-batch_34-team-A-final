@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<sub-flow name="insertingNotes" doc:id="0c653a8c-7dfe-48d3-93de-bb31ba5fcea8" >
+	
+	<db:insert doc:name="Insert" doc:id="e6f353cc-0987-4181-84bc-0733fee5e9d3" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into notes(title,content) value (:title,:content)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"title": vars.data.title,
+	"content": vars.data.content,
+	
+	
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="4caa9c4f-d170-4711-a3bc-fc8f359c9699" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"Message":"successfull Inserted","status":"201"}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+	</sub-flow>
+	<sub-flow name="deleteingNotesbyId" doc:id="fd100637-0e61-4937-b908-47f0ffe45e75" >
+		<db:delete doc:name="Delete" doc:id="2a8c1835-0879-425b-9a80-bed8609babaf" config-ref="Database_Config">
+			<db:sql ><![CDATA[delete from notes where id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: attributes.uriParams.noteId
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="81335e2d-b8ef-4e0c-9f56-76518c0ba08e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"Message":"successfull Deleted","status":"200"}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="getNotesById" doc:id="fa2abacc-4cd6-4c54-ac96-d62fa0ad3afb" >
+		<db:select doc:name="Select" doc:id="2855ff54-d7b2-4fdb-9dae-f2ab7923b772" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from notes where id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: attributes.uriParams.noteId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="cbb9c01f-5ce0-470d-ab62-f62827d5f9b1" >
+			<when expression="#[sizeOf(payload) == 0]">
+				<raise-error doc:name="Raise error" doc:id="466288b9-e165-4161-83de-a24b10d92892" type="NOTE:NOTE_NOT_FOUND"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="0b83ca27-3e77-4b26-8c21-6466d91bd514">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="getAllNOtes" doc:id="2f85ca6f-f0d4-4779-9b2d-4b2e1ccdb034" >
+		<db:select doc:name="Select" doc:id="455f7b5b-855a-4ab5-894b-14be878a0e76" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from notes]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="081bed0e-f1db-436f-bf2c-64163e1aef88">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="UpdateNOtesById" doc:id="f6e5d481-f05c-45ed-90f1-deeb3e281e63" >
+		<db:update doc:name="Update" doc:id="33cb3fdb-ad32-4f20-9b93-59879d6ad67c" config-ref="Database_Config">
+			<db:sql ><![CDATA[update notes set content=:content,title=:title,modifiedAt=:modifiedAt  where id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: attributes.uriParams.noteId,
+	content: vars.data.content,
+	title: payload.title,
+	modifiedAt:  now() as String {format: "dd/MM/yyyy hh:mm:ss"}
+}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="1e1a018a-8ab9-4a70-942c-8250e7903c55" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"Message":"successfull Updated","status":"200"}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

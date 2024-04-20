@@ -1,0 +1,15 @@
+http:
+      host: "![XlupVBRJjcUmDw0HCreE9g==]"
+      port: "![LayS8qjDpo8=]"
+      path: "![BZCV0ctPlIs=]"
+db:
+      host: "![XlupVBRJjcUmDw0HCreE9g==]"
+      port: "![i7vL7XrL1eM=]"
+      username: "![A2Xoc3qMudY=]"
+      password: "![xzK6b5KfqK62ZHZEfJv1AQ==]"
+      database: "![Jbd3/GbhRKw=]"
+router:
+         outboundHeaders: "![7avA3rZOfjVAl7l2AvEtfw==]"
+         httpStatus: "![eNqfEJMFQaqklAPDdlWxFQ==]"
+api:
+     id: "![pjOP7clHGp2NW91fS3zZ/Q==]"

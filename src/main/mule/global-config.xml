@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="fb7fb803-82fe-4487-a729-fff7ca199ba3">
+        <db:my-sql-connection host="${secure::db.host}" port="${secure::db.port}" user="${secure::db.username}" password="${secure::db.password}" database="${secure::db.database}" />
+    </db:config>
+    <configuration doc:name="Configuration" doc:id="48eee4c0-e0fb-4b27-a790-72a50cada25e" defaultErrorHandler-ref="global-error-handlingError_Handler" />
+    <http:listener-config name="notes_tutor1-httpListenerConfig">
+        <http:listener-connection host="${secure::http.host}" port="${secure::http.port}" />
+    </http:listener-config>
+    <apikit:config name="notes-config" api="resource::260d9281-c659-4f26-be74-b3a65eea5d58:craft-34-noteapi:1.0.1:raml:zip:notes_tutor1.raml" outboundHeadersMapName="${secure::router.outboundHeaders}" httpStatusVarName="${secure::router.httpStatus}" />
+	<api-gateway:autodiscovery apiId="${secure::api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="862b7b8b-1620-4a3c-ac34-18a873676ba9" flowRef="notes-main" />
+	<global-property doc:name="Global Property" doc:id="21d05138-dd29-4341-b811-6875fa04a997" name="env" value="dev" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="898eec40-0e51-4677-a87b-71b9658c361c" file="config\dev-secure.yaml" key="HelloMule" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+</mule>
